@@ -1,7 +1,7 @@
 version: '3'
 services:
     web:
-        image: nginx:alpine
+        image: nginx:1.23
         volumes:
           - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
           - ./app:/app
@@ -11,15 +11,20 @@ services:
             - php
             - mysql
     php:
-        image: php:fpm
+        build: 
+            context: .
+            dockerfile: PHP.Dockerfile
         volumes:
             - ./app:/app
     mysql:
-        image: mariadb:latest
+        image: mariadb:10.7.8
         environment:
-            MYSQL_ROOT_PASSWORD: 'secret'
-            MYSQL_USER: 'tutorial'
-            MYSQL_PASSWORD: 'secret'
-            MYSQL_DATABASE: 'tutorial'
+            MARIADB_ROOT_PASSWORD: 'secret'
+            MARIADB_USER: 'example-user'
+            MARIADB_PASSWORD: 'my_cool_secret'
+            MARIADB_DATABASE: 'samplevideo_db'
+        volumes:
+            # Init is happened only on first start of container, to reinit - 'docker compose rm'
+            - ./config/dump.sql:/docker-entrypoint-initdb.d/dump.sql
         ports:
             - 3306:3306
